@@ -49,4 +49,6 @@ func main() {
 			// 	fmt.Println("No value received.")
 		}
 	}
+
+	fmt.Println("sdfsdfsdf")
 }
