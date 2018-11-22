@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -21,13 +22,18 @@ func createWrok(id int) chan int {
 func generator() chan int {
 
 	out := make(chan int)
-	go func() {
-		i := 0
-		for {
-			time.Sleep(time.Duration(rand.Intn(1500)) * time.Millisecond)
-			out <- i
-			i++
-		}
+	lock := sync.Mutex{}
+	func() {
+		go func() {
+			i := 0
+			for {
+				lock.Lock()
+				time.Sleep(time.Duration(rand.Intn(1500)) * time.Millisecond)
+				out <- i
+				i++
+				lock.Unlock()
+			}
+		}()
 	}()
 	return out
 }
@@ -37,6 +43,7 @@ func main() {
 	var c1, c2 = generator(), generator()
 	w := createWrok(0)
 
+	tm := time.After(10 * time.Second)
 	for {
 		select {
 		case n := <-c1:
@@ -47,6 +54,9 @@ func main() {
 			w <- n
 			// default:
 			// 	fmt.Println("No value received.")
+		case <-tm:
+			fmt.Println("This program is shutdown.")
 		}
 	}
+
 }
