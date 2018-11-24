@@ -8,6 +8,8 @@ import (
 func readMaze(filename string) [][]int {
 
 	file, err := os.Open(filename)
+	defer file.Close()
+
 	if nil != err {
 		panic(err)
 	}
